@@ -1815,6 +1815,9 @@ public final class ClusterProperty {
     public static final HazelcastProperty PERSISTENCE_AUTO_CLUSTER_STATE_STRATEGY = new HazelcastProperty(
             "hazelcast.persistence.auto.cluster.state.strategy", ClusterState.NO_MIGRATION);
 
+    public static final HazelcastProperty MAP_REMOTE_CLUSTER_ENABLED = new HazelcastProperty(
+            "hazelcast.map.remote.cluster.enabled", false);
+
     public static final HazelcastProperty MAP_REMOTE_CLUSTER_ADDRESS = new HazelcastProperty(
             "hazelcast.map.remote.cluster.address", (String) null);
 

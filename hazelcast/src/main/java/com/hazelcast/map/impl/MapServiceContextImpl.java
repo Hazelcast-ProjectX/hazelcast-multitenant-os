@@ -110,6 +110,7 @@ import static com.hazelcast.spi.impl.operationservice.Operation.GENERIC_PARTITIO
 import static com.hazelcast.spi.properties.ClusterProperty.AGGREGATION_ACCUMULATION_PARALLEL_EVALUATION;
 import static com.hazelcast.spi.properties.ClusterProperty.INDEX_COPY_BEHAVIOR;
 import static com.hazelcast.spi.properties.ClusterProperty.MAP_REMOTE_CLUSTER_ADDRESS;
+import static com.hazelcast.spi.properties.ClusterProperty.MAP_REMOTE_CLUSTER_ENABLED;
 import static com.hazelcast.spi.properties.ClusterProperty.MAP_REMOTE_CLUSTER_NAME;
 import static com.hazelcast.spi.properties.ClusterProperty.OPERATION_CALL_TIMEOUT_MILLIS;
 import static com.hazelcast.spi.properties.ClusterProperty.QUERY_PREDICATE_PARALLEL_EVALUATION;
@@ -195,13 +196,14 @@ class MapServiceContextImpl implements MapServiceContext {
                     + "means all map operations will run as if they have map-store configured. "
                     + "The intended usage for this flag is testing purposes.");
         }
-        String remoteStorageClusterAddress = nodeEngine.getProperties().getString(MAP_REMOTE_CLUSTER_ADDRESS);
-        String remoteStorageClusterName = nodeEngine.getProperties().getString(MAP_REMOTE_CLUSTER_NAME);
-        if (remoteStorageClusterAddress == null) {
-            this.remoteClusterClient = null;
-        } else {
+        boolean remoteStorageClusterEnabled =nodeEngine.getProperties().getBoolean(MAP_REMOTE_CLUSTER_ENABLED);
+        if (remoteStorageClusterEnabled) {
+            String remoteStorageClusterAddress = nodeEngine.getProperties().getString(MAP_REMOTE_CLUSTER_ADDRESS);
+            String remoteStorageClusterName = nodeEngine.getProperties().getString(MAP_REMOTE_CLUSTER_NAME);
             this.remoteClusterClient = startRemoteClusterClient(remoteStorageClusterName,
                     remoteStorageClusterAddress);
+        } else {
+            this.remoteClusterClient = null;
         }
     }
 
@@ -931,10 +933,12 @@ class MapServiceContextImpl implements MapServiceContext {
     private HazelcastInstance startRemoteClusterClient(String remoteStorageClusterName,
                                                        String remoteStorageClusterAddress) {
         logger.info("Starting remote cluster connection to " + remoteStorageClusterAddress);
-        ClientConfig clientConfig = new ClientConfig();
-        clientConfig.getNetworkConfig().addAddress(remoteStorageClusterAddress);
+        ClientConfig clientConfig = ClientConfig.load();
         if (remoteStorageClusterName != null) {
             clientConfig.setClusterName(remoteStorageClusterName);
+        }
+        if (remoteStorageClusterAddress != null) {
+            clientConfig.getNetworkConfig().addAddress(remoteStorageClusterAddress);
         }
         HazelcastInstance client = HazelcastClient.newHazelcastClient(clientConfig);
         return client;
