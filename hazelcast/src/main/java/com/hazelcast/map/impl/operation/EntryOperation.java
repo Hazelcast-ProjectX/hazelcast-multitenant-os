@@ -150,7 +150,7 @@ public class EntryOperation extends LockAwareOperation
 
     private static final int SET_UNLOCK_FAST_RETRY_LIMIT = 10;
 
-    private EntryProcessor entryProcessor;
+    protected EntryProcessor entryProcessor;
 
     private transient boolean offload;
 
