@@ -28,10 +28,16 @@ public class RemoteMapOperationProvider extends DefaultMapOperationProvider {
     }
 
     MapOperation inject(MapOperation mapOperation) {
+        if (! (mapOperation instanceof RemoteMapOperation)) {
+            throw new IllegalArgumentException("Map operation must be an instance of RemoteMapOperation");
+        }
         mapOperation.setNodeEngine(mapServiceContext.getNodeEngine());
         mapOperation.setServiceName(MapService.SERVICE_NAME);
         mapOperation.setMapService(mapServiceContext.getService());
         ((RemoteMapOperation) mapOperation).setRemoteClusterClient(remoteClusterClient);
+        // todo can cluster ID change over time?
+        ((RemoteMapOperation) mapOperation)
+                .setClusterId(mapServiceContext.getNodeEngine().getClusterService().getClusterId().toString() + ".");
         return mapOperation;
     }
 }

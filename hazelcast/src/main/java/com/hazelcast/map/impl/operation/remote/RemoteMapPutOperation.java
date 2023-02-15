@@ -7,9 +7,17 @@ import com.hazelcast.map.impl.operation.PutOperation;
 public class RemoteMapPutOperation extends PutOperation implements RemoteMapOperation {
 
     HazelcastInstance remoteClusterClient;
+    String clusterId;
 
     public RemoteMapPutOperation(String name, Data dataKey, Data dataValue) {
         super(name, dataKey, dataValue);
+    }
+
+    @Override
+    protected void runInternal() {
+        Object key = mapServiceContext.toObject(dataKey);
+        Object value = mapServiceContext.toObject(dataValue);
+        oldValue = remoteClusterClient.getMap(clusterId + name).put(key, value);
     }
 
     @Override
@@ -18,9 +26,12 @@ public class RemoteMapPutOperation extends PutOperation implements RemoteMapOper
     }
 
     @Override
-    protected void runInternal() {
-        Object key = mapServiceContext.toObject(dataKey);
-        Object value = mapServiceContext.toObject(dataValue);
-        oldValue = remoteClusterClient.getMap(name).put(key, value);
+    public void setClusterId(String clusterId) {
+        this.clusterId = clusterId;
+    }
+
+    @Override
+    public int getFactoryId() {
+        throw new UnsupportedOperationException("local only");
     }
 }
