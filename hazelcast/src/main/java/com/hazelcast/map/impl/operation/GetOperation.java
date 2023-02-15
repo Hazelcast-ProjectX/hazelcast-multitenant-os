@@ -26,9 +26,9 @@ import com.hazelcast.map.impl.operation.steps.engine.State;
 import com.hazelcast.spi.impl.operationservice.BlockingOperation;
 import com.hazelcast.spi.impl.operationservice.WaitNotifyKey;
 
-public final class GetOperation extends ReadonlyKeyBasedMapOperation implements BlockingOperation {
+public class GetOperation extends ReadonlyKeyBasedMapOperation implements BlockingOperation {
 
-    private Data result;
+    protected Data result;
 
     public GetOperation() {
     }

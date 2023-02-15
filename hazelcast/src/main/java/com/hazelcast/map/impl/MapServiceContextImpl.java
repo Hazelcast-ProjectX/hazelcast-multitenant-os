@@ -16,10 +16,13 @@
 
 package com.hazelcast.map.impl;
 
+import com.hazelcast.client.HazelcastClient;
+import com.hazelcast.client.config.ClientConfig;
 import com.hazelcast.cluster.ClusterState;
 import com.hazelcast.config.InMemoryFormat;
 import com.hazelcast.config.MapConfig;
 import com.hazelcast.config.PartitioningStrategyConfig;
+import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.internal.eviction.ExpirationManager;
 import com.hazelcast.internal.partition.IPartitionService;
 import com.hazelcast.internal.serialization.Data;
@@ -48,6 +51,7 @@ import com.hazelcast.map.impl.nearcache.MapNearCacheManager;
 import com.hazelcast.map.impl.operation.MapOperationProvider;
 import com.hazelcast.map.impl.operation.MapOperationProviders;
 import com.hazelcast.map.impl.operation.MapPartitionDestroyOperation;
+import com.hazelcast.map.impl.operation.remote.RemoteMapOperationProvider;
 import com.hazelcast.map.impl.query.AccumulationExecutor;
 import com.hazelcast.map.impl.query.AggregationResult;
 import com.hazelcast.map.impl.query.AggregationResultProcessor;
@@ -105,6 +109,8 @@ import static com.hazelcast.spi.impl.executionservice.ExecutionService.QUERY_EXE
 import static com.hazelcast.spi.impl.operationservice.Operation.GENERIC_PARTITION_ID;
 import static com.hazelcast.spi.properties.ClusterProperty.AGGREGATION_ACCUMULATION_PARALLEL_EVALUATION;
 import static com.hazelcast.spi.properties.ClusterProperty.INDEX_COPY_BEHAVIOR;
+import static com.hazelcast.spi.properties.ClusterProperty.MAP_REMOTE_CLUSTER_ADDRESS;
+import static com.hazelcast.spi.properties.ClusterProperty.MAP_REMOTE_CLUSTER_NAME;
 import static com.hazelcast.spi.properties.ClusterProperty.OPERATION_CALL_TIMEOUT_MILLIS;
 import static com.hazelcast.spi.properties.ClusterProperty.QUERY_PREDICATE_PARALLEL_EVALUATION;
 import static java.lang.Thread.currentThread;
@@ -143,6 +149,8 @@ class MapServiceContextImpl implements MapServiceContext {
     private final ConcurrentMap<String, MapContainer> mapContainers = new ConcurrentHashMap<>();
     private final ExecutorStats offloadedExecutorStats = new ExecutorStats();
     private final EventListenerCounter eventListenerCounter = new EventListenerCounter();
+
+    private final HazelcastInstance remoteClusterClient;
 
     /**
      * @see {@link MapKeyLoader#DEFAULT_LOADED_KEY_LIMIT_PER_NODE}
@@ -186,6 +194,14 @@ class MapServiceContextImpl implements MapServiceContext {
             logger.info("Force offload is enabled for all maps. This "
                     + "means all map operations will run as if they have map-store configured. "
                     + "The intended usage for this flag is testing purposes.");
+        }
+        String remoteStorageClusterAddress = nodeEngine.getProperties().getString(MAP_REMOTE_CLUSTER_ADDRESS);
+        String remoteStorageClusterName = nodeEngine.getProperties().getString(MAP_REMOTE_CLUSTER_NAME);
+        if (remoteStorageClusterAddress == null) {
+            this.remoteClusterClient = null;
+        } else {
+            this.remoteClusterClient = startRemoteClusterClient(remoteStorageClusterName,
+                    remoteStorageClusterAddress);
         }
     }
 
@@ -786,6 +802,9 @@ class MapServiceContextImpl implements MapServiceContext {
 
     @Override
     public MapOperationProvider getMapOperationProvider(String mapName) {
+        if (remoteClusterClient != null) {
+            return new RemoteMapOperationProvider(this, remoteClusterClient);
+        }
         return operationProviders.getOperationProvider(mapName);
     }
 
@@ -902,5 +921,17 @@ class MapServiceContextImpl implements MapServiceContext {
     @Override
     public EventListenerCounter getEventListenerCounter() {
         return eventListenerCounter;
+    }
+
+    private HazelcastInstance startRemoteClusterClient(String remoteStorageClusterName,
+                                                       String remoteStorageClusterAddress) {
+        logger.info("Starting remote cluster connection to " + remoteStorageClusterAddress);
+        ClientConfig clientConfig = new ClientConfig();
+        clientConfig.getNetworkConfig().addAddress(remoteStorageClusterAddress);
+        if (remoteStorageClusterName != null) {
+            clientConfig.setClusterName(remoteStorageClusterName);
+        }
+        HazelcastInstance client = HazelcastClient.newHazelcastClient(clientConfig);
+        return client;
     }
 }

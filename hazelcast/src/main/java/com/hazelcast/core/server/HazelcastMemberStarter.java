@@ -16,8 +16,10 @@
 
 package com.hazelcast.core.server;
 
+import com.hazelcast.config.Config;
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.spi.properties.ClusterProperty;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -41,8 +43,20 @@ public final class HazelcastMemberStarter {
      * @param args none
      */
     public static void main(String[] args) throws FileNotFoundException, UnsupportedEncodingException {
-        System.setProperty("hazelcast.tracking.server", "true");
-        HazelcastInstance hz = Hazelcast.newHazelcastInstance();
+        Config config = new Config();
+        // start with different cluster name & port than storage cluster
+        config.setClusterName("compute");
+        config.getNetworkConfig().setPort(5901);
+        config.getNetworkConfig().getJoin().getMulticastConfig().setEnabled(false);
+        config.getNetworkConfig().getJoin().getTcpIpConfig()
+                .setEnabled(true).addMember("127.0.0.1:5901");
+        // setup connection to remote storage cluster
+        config.setProperty(ClusterProperty.MAP_REMOTE_CLUSTER_ADDRESS.getName(), "127.0.0.1:5701");
+        config.setProperty(ClusterProperty.MAP_REMOTE_CLUSTER_NAME.getName(), "storage");
+        // disable map-store offloading for all maps
+        config.getMapConfig("default").getMapStoreConfig().setOffload(false);
+
+        HazelcastInstance hz = Hazelcast.newHazelcastInstance(config);
         printMemberPort(hz);
     }
 
