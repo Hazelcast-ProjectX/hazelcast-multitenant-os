@@ -923,6 +923,11 @@ class MapServiceContextImpl implements MapServiceContext {
         return eventListenerCounter;
     }
 
+    @Override
+    public HazelcastInstance getRemoteClusterClient() {
+        return remoteClusterClient;
+    }
+
     private HazelcastInstance startRemoteClusterClient(String remoteStorageClusterName,
                                                        String remoteStorageClusterAddress) {
         logger.info("Starting remote cluster connection to " + remoteStorageClusterAddress);

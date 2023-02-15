@@ -22,6 +22,7 @@ import com.hazelcast.core.DistributedObject;
 import com.hazelcast.internal.services.RemoteService;
 import com.hazelcast.map.impl.proxy.MapProxyImpl;
 import com.hazelcast.map.impl.proxy.NearCachedMapProxyImpl;
+import com.hazelcast.map.impl.proxy.RemoteMapProxy;
 import com.hazelcast.spi.impl.NodeEngine;
 import com.hazelcast.spi.merge.SplitBrainMergePolicyProvider;
 
@@ -53,6 +54,10 @@ class MapRemoteService implements RemoteService {
 
         checkMapConfig(mapConfig, config.getNativeMemoryConfig(), mergePolicyProvider,
                 mapServiceContext.getNodeEngine().getProperties(), nodeEngine.getLogger(MapConfig.class));
+
+        if (mapServiceContext.getRemoteClusterClient() != null) {
+            return new RemoteMapProxy<>(name, mapServiceContext.getService(), nodeEngine, mapConfig);
+        }
 
         if (mapConfig.isNearCacheEnabled()) {
             checkNearCacheConfig(name, mapConfig.getNearCacheConfig(), config.getNativeMemoryConfig(), false);

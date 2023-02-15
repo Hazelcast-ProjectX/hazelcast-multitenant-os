@@ -21,6 +21,7 @@ import com.hazelcast.config.InMemoryFormat;
 import com.hazelcast.config.MapConfig;
 import com.hazelcast.config.MapStoreConfig;
 import com.hazelcast.config.PartitioningStrategyConfig;
+import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.internal.eviction.ExpirationManager;
 import com.hazelcast.internal.serialization.Data;
 import com.hazelcast.internal.util.collection.PartitionIdSet;
@@ -245,4 +246,9 @@ public interface MapServiceContext extends MapServiceContextInterceptorSupport,
      * @return {@link EventListenerCounter} object.
      */
     EventListenerCounter getEventListenerCounter();
+
+    /**
+     * @return a Hazelcast client to storage cluster or {@code null} if none configured
+     */
+    HazelcastInstance getRemoteClusterClient();
 }

@@ -59,7 +59,7 @@ public class RemoteMapOperationProvider extends DefaultMapOperationProvider {
 
 
     MapOperation inject(MapOperation mapOperation) {
-        if (! (mapOperation instanceof RemoteMapOperation)) {
+        if (!(mapOperation instanceof RemoteMapOperation)) {
             throw new IllegalArgumentException("Map operation must be an instance of RemoteMapOperation");
         }
         mapOperation.setNodeEngine(mapServiceContext.getNodeEngine());
