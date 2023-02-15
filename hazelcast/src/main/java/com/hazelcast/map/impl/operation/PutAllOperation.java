@@ -55,8 +55,8 @@ public class PutAllOperation extends MapOperation
         implements PartitionAwareOperation, BackupAwareOperation,
         MutatingOperation, Versioned {
 
+    protected MapEntries mapEntries;
     private transient int currentIndex;
-    private MapEntries mapEntries;
     private volatile boolean triggerMapLoader;
 
     private transient boolean hasMapListener;

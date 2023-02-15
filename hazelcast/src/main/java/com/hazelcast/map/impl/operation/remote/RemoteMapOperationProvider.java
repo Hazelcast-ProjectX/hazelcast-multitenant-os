@@ -2,6 +2,7 @@ package com.hazelcast.map.impl.operation.remote;
 
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.internal.serialization.Data;
+import com.hazelcast.map.impl.MapEntries;
 import com.hazelcast.map.impl.MapService;
 import com.hazelcast.map.impl.MapServiceContext;
 import com.hazelcast.map.impl.operation.DefaultMapOperationProvider;
@@ -25,6 +26,11 @@ public class RemoteMapOperationProvider extends DefaultMapOperationProvider {
     @Override
     public MapOperation createPutOperation(String name, Data key, Data value, long ttl, long maxIdle) {
         return inject(new RemoteMapPutOperation(name, key, value));
+    }
+
+    @Override
+    public MapOperation createPutAllOperation(String name, MapEntries mapEntries, boolean triggerMapLoader) {
+        return inject(new RemoteMapPutAllOperation(name, mapEntries, triggerMapLoader));
     }
 
     MapOperation inject(MapOperation mapOperation) {
