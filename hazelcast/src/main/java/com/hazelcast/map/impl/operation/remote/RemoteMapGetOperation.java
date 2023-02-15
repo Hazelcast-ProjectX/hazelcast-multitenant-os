@@ -1,14 +1,17 @@
 package com.hazelcast.map.impl.operation.remote;
 
-import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.internal.serialization.Data;
+import com.hazelcast.map.impl.MapDataSerializerHook;
 import com.hazelcast.map.impl.operation.GetOperation;
+
+import static com.hazelcast.map.impl.operation.remote.RemoteMapUtil.clusterId;
 
 public class RemoteMapGetOperation extends GetOperation implements RemoteMapOperation {
 
-    HazelcastInstance remoteClusterClient;
-    String clusterId;
-    Object key;
+    transient Object key;
+
+    public RemoteMapGetOperation() {
+    }
 
     public RemoteMapGetOperation(String name, Data dataKey, Object key) {
         super(name, dataKey);
@@ -17,22 +20,13 @@ public class RemoteMapGetOperation extends GetOperation implements RemoteMapOper
 
     @Override
     protected void runInternal() {
-        Object value = remoteClusterClient.getMap(clusterId + name).get(key);
+        key = mapServiceContext.toObject(dataKey);
+        Object value = mapServiceContext.getRemoteClusterClient().getMap(clusterId(mapServiceContext) + name).get(key);
         result = extractResult(mapServiceContext.toData(value));
     }
 
     @Override
-    public void setRemoteClusterClient(HazelcastInstance client) {
-        this.remoteClusterClient = client;
-    }
-
-    @Override
-    public void setClusterId(String clusterId) {
-        this.clusterId = clusterId;
-    }
-
-    @Override
-    public int getFactoryId() {
-        throw new UnsupportedOperationException("local only");
+    public int getClassId() {
+        return MapDataSerializerHook.REMOTE_MAP_GET_OPERATION;
     }
 }

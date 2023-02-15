@@ -127,6 +127,11 @@ import com.hazelcast.map.impl.operation.TriggerLoadIfNeededOperation;
 import com.hazelcast.map.impl.operation.TryPutOperation;
 import com.hazelcast.map.impl.operation.TryRemoveOperation;
 import com.hazelcast.map.impl.operation.WriteBehindStateHolder;
+import com.hazelcast.map.impl.operation.remote.RemoteMapEntryOperation;
+import com.hazelcast.map.impl.operation.remote.RemoteMapGetOperation;
+import com.hazelcast.map.impl.operation.remote.RemoteMapPutAllOperation;
+import com.hazelcast.map.impl.operation.remote.RemoteMapPutIfAbsentOperation;
+import com.hazelcast.map.impl.operation.remote.RemoteMapPutOperation;
 import com.hazelcast.map.impl.query.AggregationResult;
 import com.hazelcast.map.impl.query.Query;
 import com.hazelcast.map.impl.query.QueryEventFilter;
@@ -324,8 +329,13 @@ public final class MapDataSerializerHook implements DataSerializerHook {
     public static final int INDEX_ITERATION_POINTER = 156;
     public static final int MAP_FETCH_INDEX_OPERATION_RESULT = 157;
     public static final int MAP_CHUNK = 158;
+    public static final int REMOTE_MAP_ENTRY_OPERATION = 159;
+    public static final int REMOTE_MAP_GET_OPERATION = 160;
+    public static final int REMOTE_MAP_PUT_ALL_OPERATION = 161;
+    public static final int REMOTE_MAP_PUT_IF_ABSENT_OPERATION = 162;
+    public static final int REMOTE_MAP_PUT_OPERATION = 163;
 
-    private static final int LEN = MAP_CHUNK + 1;
+    private static final int LEN = REMOTE_MAP_PUT_OPERATION + 1;
 
     @Override
     public int getFactoryId() {
@@ -491,6 +501,11 @@ public final class MapDataSerializerHook implements DataSerializerHook {
         constructors[INDEX_ITERATION_POINTER] = arg -> new IndexIterationPointer();
         constructors[MAP_FETCH_INDEX_OPERATION_RESULT] = arg -> new MapFetchIndexOperationResult();
         constructors[MAP_CHUNK] = arg -> new MapChunk();
+//        constructors[REMOTE_MAP_PUT_IF_ABSENT_OPERATION] = arg -> new RemoteMapPutIfAbsentOperation();
+        constructors[REMOTE_MAP_PUT_OPERATION] = arg -> new RemoteMapPutOperation();
+//        constructors[REMOTE_MAP_PUT_ALL_OPERATION] = arg -> new RemoteMapPutAllOperation();
+//        constructors[REMOTE_MAP_ENTRY_OPERATION] = arg -> new RemoteMapEntryOperation();
+        constructors[REMOTE_MAP_GET_OPERATION] = arg -> new RemoteMapGetOperation();
 
         return new ArrayDataSerializableFactory(constructors);
     }

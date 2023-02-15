@@ -1,48 +1,32 @@
 package com.hazelcast.map.impl.operation.remote;
 
-import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.internal.serialization.Data;
-import com.hazelcast.map.impl.operation.PutIfAbsentOperation;
+import com.hazelcast.map.impl.MapDataSerializerHook;
+import com.hazelcast.map.impl.operation.PutIfAbsentWithExpiryOperation;
 
 import java.util.concurrent.TimeUnit;
 
-public class RemoteMapPutIfAbsentOperation extends PutIfAbsentOperation implements RemoteMapOperation {
+import static com.hazelcast.map.impl.operation.remote.RemoteMapUtil.clusterId;
 
-    HazelcastInstance remoteClusterClient;
-    String clusterId;
-
-    long ttl;
-    long maxIdle;
+public class RemoteMapPutIfAbsentOperation extends PutIfAbsentWithExpiryOperation implements RemoteMapOperation {
 
     public RemoteMapPutIfAbsentOperation(String name, Data key, Data value, long ttl, long maxIdle) {
-        super(name, key, value);
-        this.ttl = ttl;
-        this.maxIdle = maxIdle;
+        super(name, key, value, ttl, maxIdle);
     }
 
     @Override
     protected void runInternal() {
-        this.oldValue = remoteClusterClient.getMap(clusterId + name).putIfAbsent(
+        this.oldValue = mapServiceContext.getRemoteClusterClient()
+                .getMap(clusterId(mapServiceContext) + name).putIfAbsent(
                 dataKey, dataValue,
-                ttl, TimeUnit.MILLISECONDS,
-                maxIdle, TimeUnit.MILLISECONDS
+                getTtl(), TimeUnit.MILLISECONDS,
+                getMaxIdle(), TimeUnit.MILLISECONDS
         );
         this.successful = oldValue == null;
     }
 
-
     @Override
-    public void setRemoteClusterClient(HazelcastInstance client) {
-        this.remoteClusterClient = client;
-    }
-
-    @Override
-    public void setClusterId(String clusterId) {
-        this.clusterId = clusterId;
-    }
-
-    @Override
-    public int getFactoryId() {
-        throw new UnsupportedOperationException("local only");
+    public int getClassId() {
+        return MapDataSerializerHook.REMOTE_MAP_PUT_IF_ABSENT_OPERATION;
     }
 }

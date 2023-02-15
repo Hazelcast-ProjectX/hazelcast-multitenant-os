@@ -1,16 +1,15 @@
 package com.hazelcast.map.impl.operation.remote;
 
-import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.map.impl.MapDataSerializerHook;
 import com.hazelcast.map.impl.MapEntries;
 import com.hazelcast.map.impl.operation.PutAllOperation;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class RemoteMapPutAllOperation extends PutAllOperation implements RemoteMapOperation {
+import static com.hazelcast.map.impl.operation.remote.RemoteMapUtil.clusterId;
 
-    HazelcastInstance remoteClusterClient;
-    String clusterId;
+public class RemoteMapPutAllOperation extends PutAllOperation implements RemoteMapOperation {
 
     public RemoteMapPutAllOperation(String name, MapEntries mapEntries, boolean triggerMapLoader) {
         super(name, mapEntries, triggerMapLoader);
@@ -21,21 +20,11 @@ public class RemoteMapPutAllOperation extends PutAllOperation implements RemoteM
         // grossly inefficient
         Map<Object, Object> deserMapEntries = new HashMap<>();
         mapEntries.putAllToMap(mapServiceContext.getNodeEngine().getSerializationService(), deserMapEntries);
-        remoteClusterClient.getMap(clusterId + name).putAll(deserMapEntries);
+        mapServiceContext.getRemoteClusterClient().getMap(clusterId(mapServiceContext) + name).putAll(deserMapEntries);
     }
 
     @Override
-    public void setRemoteClusterClient(HazelcastInstance client) {
-        this.remoteClusterClient = client;
-    }
-
-    @Override
-    public void setClusterId(String clusterId) {
-        this.clusterId = clusterId;
-    }
-
-    @Override
-    public int getFactoryId() {
-        throw new UnsupportedOperationException("local only");
+    public int getClassId() {
+        return MapDataSerializerHook.REMOTE_MAP_PUT_ALL_OPERATION;
     }
 }

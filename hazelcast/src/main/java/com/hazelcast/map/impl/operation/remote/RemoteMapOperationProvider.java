@@ -65,10 +65,6 @@ public class RemoteMapOperationProvider extends DefaultMapOperationProvider {
         mapOperation.setNodeEngine(mapServiceContext.getNodeEngine());
         mapOperation.setServiceName(MapService.SERVICE_NAME);
         mapOperation.setMapService(mapServiceContext.getService());
-        ((RemoteMapOperation) mapOperation).setRemoteClusterClient(remoteClusterClient);
-        // todo can cluster ID change over time?
-        ((RemoteMapOperation) mapOperation)
-                .setClusterId(mapServiceContext.getNodeEngine().getClusterService().getClusterId().toString() + ".");
         return mapOperation;
     }
 

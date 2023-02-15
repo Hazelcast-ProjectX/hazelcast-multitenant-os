@@ -1,0 +1,13 @@
+package com.hazelcast.map.impl.operation.remote;
+
+import com.hazelcast.map.impl.MapServiceContext;
+
+public class RemoteMapUtil {
+
+    private RemoteMapUtil() {
+    }
+
+    static String clusterId(MapServiceContext mapServiceContext) {
+        return mapServiceContext.getNodeEngine().getClusterService().getClusterId() + ".";
+    }
+}

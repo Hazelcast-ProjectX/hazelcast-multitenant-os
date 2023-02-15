@@ -2,12 +2,18 @@ package com.hazelcast.map.impl.operation.remote;
 
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.internal.serialization.Data;
+import com.hazelcast.map.impl.MapDataSerializerHook;
 import com.hazelcast.map.impl.operation.PutOperation;
+
+import static com.hazelcast.map.impl.operation.remote.RemoteMapUtil.clusterId;
 
 public class RemoteMapPutOperation extends PutOperation implements RemoteMapOperation {
 
     HazelcastInstance remoteClusterClient;
     String clusterId;
+
+    public RemoteMapPutOperation() {
+    }
 
     public RemoteMapPutOperation(String name, Data dataKey, Data dataValue) {
         super(name, dataKey, dataValue);
@@ -17,21 +23,12 @@ public class RemoteMapPutOperation extends PutOperation implements RemoteMapOper
     protected void runInternal() {
         Object key = mapServiceContext.toObject(dataKey);
         Object value = mapServiceContext.toObject(dataValue);
-        oldValue = remoteClusterClient.getMap(clusterId + name).put(key, value);
+        oldValue = mapServiceContext.getRemoteClusterClient().getMap(
+                clusterId(mapServiceContext) + name).put(key, value);
     }
 
     @Override
-    public void setRemoteClusterClient(HazelcastInstance client) {
-        this.remoteClusterClient = client;
-    }
-
-    @Override
-    public void setClusterId(String clusterId) {
-        this.clusterId = clusterId;
-    }
-
-    @Override
-    public int getFactoryId() {
-        throw new UnsupportedOperationException("local only");
+    public int getClassId() {
+        return MapDataSerializerHook.REMOTE_MAP_PUT_OPERATION;
     }
 }
