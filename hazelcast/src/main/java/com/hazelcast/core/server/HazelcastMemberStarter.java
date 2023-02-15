@@ -43,20 +43,11 @@ public final class HazelcastMemberStarter {
      * @param args none
      */
     public static void main(String[] args) throws FileNotFoundException, UnsupportedEncodingException {
-        Config config = new Config();
-        // start with different cluster name & port than storage cluster
-        config.setClusterName("compute");
-        config.getNetworkConfig().setPort(5901);
-        config.getNetworkConfig().getJoin().getMulticastConfig().setEnabled(false);
-        config.getNetworkConfig().getJoin().getTcpIpConfig()
-                .setEnabled(true).addMember("127.0.0.1:5901");
         // setup connection to remote storage cluster
-        config.setProperty(ClusterProperty.MAP_REMOTE_CLUSTER_ADDRESS.getName(), "127.0.0.1:5701");
-        config.setProperty(ClusterProperty.MAP_REMOTE_CLUSTER_NAME.getName(), "storage");
-        // disable map-store offloading for all maps
-        config.getMapConfig("default").getMapStoreConfig().setOffload(false);
+        System.setProperty(ClusterProperty.MAP_REMOTE_CLUSTER_ADDRESS.getName(), "127.0.0.1:5701");
+        System.setProperty(ClusterProperty.MAP_REMOTE_CLUSTER_NAME.getName(), "storage");
 
-        HazelcastInstance hz = Hazelcast.newHazelcastInstance(config);
+        HazelcastInstance hz = Hazelcast.newHazelcastInstance();
         printMemberPort(hz);
     }
 
