@@ -1,6 +1,7 @@
 package com.hazelcast.map.impl.operation.remote;
 
 import com.hazelcast.internal.serialization.InternalSerializationService;
+import com.hazelcast.internal.serialization.impl.compact.CompactGenericRecord;
 import com.hazelcast.map.impl.MapContainer;
 import com.hazelcast.map.impl.MapServiceContext;
 
@@ -19,6 +20,11 @@ public class RemoteMapUtil {
             InternalSerializationService iss =
                     (InternalSerializationService) mapServiceContext.getNodeEngine().getSerializationService();
             try {
+                if (value instanceof CompactGenericRecord) {
+                    CompactGenericRecord compact = (CompactGenericRecord) value;
+                    mapServiceContext.getNodeEngine().getSchemaService().put(compact.getSchema());
+                    return;
+                }
                 if (iss.isCompactSerializable(key)) {
                     iss.extractSchemaFromObject(key);
                 }
@@ -37,6 +43,11 @@ public class RemoteMapUtil {
         InternalSerializationService iss =
                 (InternalSerializationService) mapServiceContext.getNodeEngine().getSerializationService();
         try {
+            if (value instanceof CompactGenericRecord) {
+                CompactGenericRecord compact = (CompactGenericRecord) value;
+                mapServiceContext.getNodeEngine().getSchemaService().put(compact.getSchema());
+                return;
+            }
             if (iss.isCompactSerializable(key)) {
                 iss.extractSchemaFromObject(key);
             }
