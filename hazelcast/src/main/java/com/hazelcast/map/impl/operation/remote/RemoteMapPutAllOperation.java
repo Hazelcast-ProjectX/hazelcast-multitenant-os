@@ -11,6 +11,10 @@ import static com.hazelcast.map.impl.operation.remote.RemoteMapUtil.clusterId;
 
 public class RemoteMapPutAllOperation extends PutAllOperation implements RemoteMapOperation {
 
+    public RemoteMapPutAllOperation() {
+        super();
+    }
+
     public RemoteMapPutAllOperation(String name, MapEntries mapEntries, boolean triggerMapLoader) {
         super(name, mapEntries, triggerMapLoader);
     }

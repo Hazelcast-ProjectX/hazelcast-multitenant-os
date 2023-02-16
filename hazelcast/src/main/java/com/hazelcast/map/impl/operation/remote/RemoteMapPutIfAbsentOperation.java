@@ -10,6 +10,9 @@ import static com.hazelcast.map.impl.operation.remote.RemoteMapUtil.clusterId;
 
 public class RemoteMapPutIfAbsentOperation extends PutIfAbsentWithExpiryOperation implements RemoteMapOperation {
 
+    public RemoteMapPutIfAbsentOperation() {
+    }
+
     public RemoteMapPutIfAbsentOperation(String name, Data key, Data value, long ttl, long maxIdle) {
         super(name, key, value, ttl, maxIdle);
     }

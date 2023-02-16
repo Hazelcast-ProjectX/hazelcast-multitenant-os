@@ -15,6 +15,10 @@ public class RemoteMapEntryOperation extends KeyBasedMapOperation implements Rem
 
     EntryProcessor entryProcessor;
 
+    public RemoteMapEntryOperation() {
+        super();
+    }
+
     public RemoteMapEntryOperation(String name, Data dataKey, EntryProcessor entryProcessor) {
         super(name, dataKey);
 

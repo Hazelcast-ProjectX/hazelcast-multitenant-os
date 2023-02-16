@@ -501,10 +501,10 @@ public final class MapDataSerializerHook implements DataSerializerHook {
         constructors[INDEX_ITERATION_POINTER] = arg -> new IndexIterationPointer();
         constructors[MAP_FETCH_INDEX_OPERATION_RESULT] = arg -> new MapFetchIndexOperationResult();
         constructors[MAP_CHUNK] = arg -> new MapChunk();
-//        constructors[REMOTE_MAP_PUT_IF_ABSENT_OPERATION] = arg -> new RemoteMapPutIfAbsentOperation();
+        constructors[REMOTE_MAP_PUT_IF_ABSENT_OPERATION] = arg -> new RemoteMapPutIfAbsentOperation();
         constructors[REMOTE_MAP_PUT_OPERATION] = arg -> new RemoteMapPutOperation();
-//        constructors[REMOTE_MAP_PUT_ALL_OPERATION] = arg -> new RemoteMapPutAllOperation();
-//        constructors[REMOTE_MAP_ENTRY_OPERATION] = arg -> new RemoteMapEntryOperation();
+        constructors[REMOTE_MAP_PUT_ALL_OPERATION] = arg -> new RemoteMapPutAllOperation();
+        constructors[REMOTE_MAP_ENTRY_OPERATION] = arg -> new RemoteMapEntryOperation();
         constructors[REMOTE_MAP_GET_OPERATION] = arg -> new RemoteMapGetOperation();
 
         return new ArrayDataSerializableFactory(constructors);
