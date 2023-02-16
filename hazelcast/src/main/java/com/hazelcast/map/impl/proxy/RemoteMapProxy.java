@@ -38,6 +38,11 @@ public class RemoteMapProxy<K, V> extends MapProxyImpl<K, V> {
         return (InternalCompletableFuture<Void>) remoteClusterClient.getMap(prefixedMapName()).putAllAsync(map);
     }
 
+    @Override
+    public V putIfAbsent(@Nonnull K key, @Nonnull V value) {
+        return (V) remoteClusterClient.getMap(prefixedMapName()).putIfAbsent(key, value);
+    }
+
     @Nonnull
     @Override
     public Collection<V> values() {
