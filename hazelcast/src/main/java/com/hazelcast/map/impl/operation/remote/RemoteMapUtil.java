@@ -7,7 +7,7 @@ public class RemoteMapUtil {
     private RemoteMapUtil() {
     }
 
-    static String clusterId(MapServiceContext mapServiceContext) {
+    public static String clusterId(MapServiceContext mapServiceContext) {
         return mapServiceContext.getNodeEngine().getConfig().getClusterName() + ".";
     }
 }

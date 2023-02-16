@@ -6,11 +6,12 @@ import com.hazelcast.map.impl.MapService;
 import com.hazelcast.query.Predicate;
 import com.hazelcast.spi.impl.InternalCompletableFuture;
 import com.hazelcast.spi.impl.NodeEngine;
-import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
 import java.util.Collection;
 import java.util.Set;
+
+import static com.hazelcast.map.impl.operation.remote.RemoteMapUtil.clusterId;
 
 public class RemoteMapProxy<K, V> extends MapProxyImpl<K, V> {
 
@@ -52,7 +53,6 @@ public class RemoteMapProxy<K, V> extends MapProxyImpl<K, V> {
     }
 
     private String prefixedMapName() {
-        return mapServiceContext.getNodeEngine().getClusterService().getClusterId().toString() + "."
-                + name;
+        return clusterId(mapServiceContext) + name;
     }
 }
