@@ -36,9 +36,9 @@ import java.io.IOException;
  */
 public class MapFetchEntriesOperation extends MapOperation implements ReadonlyOperation {
 
-    private int fetchSize;
-    private IterationPointer[] pointers;
-    private transient MapEntriesWithCursor response;
+    protected int fetchSize;
+    protected IterationPointer[] pointers;
+    protected transient MapEntriesWithCursor response;
 
     public MapFetchEntriesOperation() {
     }

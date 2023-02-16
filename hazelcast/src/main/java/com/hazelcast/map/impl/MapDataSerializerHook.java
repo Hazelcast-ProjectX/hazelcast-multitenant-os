@@ -128,6 +128,7 @@ import com.hazelcast.map.impl.operation.TryPutOperation;
 import com.hazelcast.map.impl.operation.TryRemoveOperation;
 import com.hazelcast.map.impl.operation.WriteBehindStateHolder;
 import com.hazelcast.map.impl.operation.remote.RemoteMapEntryOperation;
+import com.hazelcast.map.impl.operation.remote.RemoteMapFetchEntriesOperation;
 import com.hazelcast.map.impl.operation.remote.RemoteMapGetOperation;
 import com.hazelcast.map.impl.operation.remote.RemoteMapPutAllOperation;
 import com.hazelcast.map.impl.operation.remote.RemoteMapPutIfAbsentOperation;
@@ -334,8 +335,9 @@ public final class MapDataSerializerHook implements DataSerializerHook {
     public static final int REMOTE_MAP_PUT_ALL_OPERATION = 161;
     public static final int REMOTE_MAP_PUT_IF_ABSENT_OPERATION = 162;
     public static final int REMOTE_MAP_PUT_OPERATION = 163;
+    public static final int REMOTE_MAP_FETCH_ENTRIES_OPERATION = 164;
 
-    private static final int LEN = REMOTE_MAP_PUT_OPERATION + 1;
+    private static final int LEN = REMOTE_MAP_FETCH_ENTRIES_OPERATION + 1;
 
     @Override
     public int getFactoryId() {
@@ -506,6 +508,7 @@ public final class MapDataSerializerHook implements DataSerializerHook {
         constructors[REMOTE_MAP_PUT_ALL_OPERATION] = arg -> new RemoteMapPutAllOperation();
         constructors[REMOTE_MAP_ENTRY_OPERATION] = arg -> new RemoteMapEntryOperation();
         constructors[REMOTE_MAP_GET_OPERATION] = arg -> new RemoteMapGetOperation();
+        constructors[REMOTE_MAP_FETCH_ENTRIES_OPERATION] = arg -> new RemoteMapFetchEntriesOperation();
 
         return new ArrayDataSerializableFactory(constructors);
     }

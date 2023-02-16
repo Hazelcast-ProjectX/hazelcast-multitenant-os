@@ -303,8 +303,7 @@ public class RemoteMapOperationProvider extends DefaultMapOperationProvider {
 
     @Override
     public MapOperation createFetchEntriesOperation(String name, IterationPointer[] pointers, int fetchSize) {
-        new RuntimeException().printStackTrace();
-        return super.createFetchEntriesOperation(name, pointers, fetchSize);
+        return inject(new RemoteMapFetchEntriesOperation(name, pointers, fetchSize));
     }
 
     @Override
