@@ -43,10 +43,6 @@ public final class HazelcastMemberStarter {
      * @param args none
      */
     public static void main(String[] args) throws FileNotFoundException, UnsupportedEncodingException {
-        // setup connection to remote storage cluster
-        System.setProperty(ClusterProperty.MAP_REMOTE_CLUSTER_ADDRESS.getName(), "127.0.0.1:5701");
-        System.setProperty(ClusterProperty.MAP_REMOTE_CLUSTER_NAME.getName(), "storage");
-
         HazelcastInstance hz = Hazelcast.newHazelcastInstance();
         printMemberPort(hz);
     }
