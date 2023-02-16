@@ -31,4 +31,20 @@ public class RemoteMapUtil {
         }
 
     }
+
+    public static void extractCompactSchema(MapServiceContext mapServiceContext,
+                                            Object key, Object value) {
+        InternalSerializationService iss =
+                (InternalSerializationService) mapServiceContext.getNodeEngine().getSerializationService();
+        try {
+            if (iss.isCompactSerializable(key)) {
+                iss.extractSchemaFromObject(key);
+            }
+            if (iss.isCompactSerializable(value)) {
+                iss.extractSchemaFromObject(value);
+            }
+        } catch (IllegalArgumentException e) {
+            // ignore -- shouldn't be thrown because we already check
+        }
+    }
 }
