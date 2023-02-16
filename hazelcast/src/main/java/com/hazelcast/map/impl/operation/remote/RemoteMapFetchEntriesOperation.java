@@ -1,6 +1,7 @@
 package com.hazelcast.map.impl.operation.remote;
 
 import com.hazelcast.client.impl.clientside.HazelcastClientInstanceImpl;
+import com.hazelcast.client.impl.clientside.HazelcastClientProxy;
 import com.hazelcast.client.impl.protocol.ClientMessage;
 import com.hazelcast.client.impl.protocol.codec.MapFetchEntriesCodec;
 import com.hazelcast.client.impl.spi.impl.ClientInvocation;
@@ -24,7 +25,7 @@ public class RemoteMapFetchEntriesOperation extends MapFetchEntriesOperation imp
     @Override
     protected void runInternal() {
         HazelcastClientInstanceImpl client =
-                (HazelcastClientInstanceImpl) getMapContainer().getMapServiceContext().getRemoteClusterClient();
+                ((HazelcastClientProxy) getMapContainer().getMapServiceContext().getRemoteClusterClient()).client;
         String remoteMapName = clusterId(mapServiceContext) + name;
         ClientMessage request = MapFetchEntriesCodec.encodeRequest(remoteMapName, encodePointers(pointers), fetchSize);
         ClientInvocation clientInvocation = new ClientInvocation(
