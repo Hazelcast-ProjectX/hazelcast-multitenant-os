@@ -76,6 +76,9 @@ public class HTTPCommunicator {
 
     // Cluster
     public static final String URI_CLUSTER = "cluster";
+
+    public static final String URI_CLUSTER_SECURITY_USERS_ADD = "management/cluster/users/add";
+    public static final String URI_CLUSTER_SECURITY_USERS_DELETE = "management/cluster/users/delete";
     public static final String URI_CLUSTER_STATE_URL = "management/cluster/state";
     public static final String URI_CHANGE_CLUSTER_STATE_URL = "management/cluster/changeState";
     public static final String URI_CLUSTER_VERSION_URL = "management/cluster/version";
@@ -294,6 +297,17 @@ public class HTTPCommunicator {
     public ConnectionResponse changeClusterState(String clusterName, String clusterPassword, String newState) throws IOException {
         String url = getUrl(URI_CHANGE_CLUSTER_STATE_URL);
         return doPost(url, clusterName, clusterPassword, newState);
+    }
+
+    public ConnectionResponse userAdd(String clusterName, String clusterPassword, String username,
+                                      String password, String roles) throws IOException {
+        String url = getUrl(URI_CLUSTER_SECURITY_USERS_ADD);
+        return doPost(url, clusterName, clusterPassword, username, password, roles);
+    }
+
+    public ConnectionResponse userDelete(String clusterName, String clusterPassword, String username) throws IOException {
+        String url = getUrl(URI_CLUSTER_SECURITY_USERS_DELETE);
+        return doPost(url, clusterName, clusterPassword, username);
     }
 
     public String getClusterVersion() throws IOException {

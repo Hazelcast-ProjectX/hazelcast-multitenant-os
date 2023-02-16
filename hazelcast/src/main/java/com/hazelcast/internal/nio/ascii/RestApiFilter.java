@@ -119,6 +119,8 @@ public class RestApiFilter implements TextProtocolFilter {
             return RestEndpointGroup.CLUSTER_READ;
         }
         if (requestUri.startsWith(HttpCommandProcessor.URI_SHUTDOWN_CLUSTER_URL)
+                || requestUri.startsWith(HttpCommandProcessor.URI_CLUSTER_SECURITY_USERS_DELETE)
+                || requestUri.startsWith(HttpCommandProcessor.URI_CLUSTER_SECURITY_USERS_ADD)
                 || requestUri.startsWith(HttpCommandProcessor.URI_SHUTDOWN_NODE_CLUSTER_URL)
                 || requestUri.startsWith(HttpCommandProcessor.URI_CHANGE_CLUSTER_STATE_URL)
                 || requestUri.startsWith(HttpCommandProcessor.URI_CLUSTER_VERSION_URL)

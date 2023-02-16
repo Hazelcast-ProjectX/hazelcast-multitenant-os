@@ -17,6 +17,7 @@
 package com.hazelcast.internal.ascii.rest;
 
 import com.hazelcast.cluster.ClusterState;
+import com.hazelcast.config.PermissionConfig;
 import com.hazelcast.config.WanReplicationConfig;
 import com.hazelcast.cp.CPSubsystem;
 import com.hazelcast.cp.CPSubsystemManagementService;
@@ -29,6 +30,8 @@ import com.hazelcast.internal.json.JsonObject;
 import com.hazelcast.internal.management.dto.WanReplicationConfigDTO;
 import com.hazelcast.internal.util.StringUtil;
 import com.hazelcast.logging.impl.LoggingServiceImpl;
+import com.hazelcast.security.SecurityService;
+import com.hazelcast.security.permission.ActionConstants;
 import com.hazelcast.version.Version;
 import com.hazelcast.wan.WanPublisherState;
 import com.hazelcast.wan.impl.AddWanConfigResult;
@@ -37,8 +40,11 @@ import com.hazelcast.wan.impl.WanReplicationService;
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import static com.hazelcast.config.TcpIpConfig.MEMBER_TEXT_SPLIT_PATTERN;
@@ -72,6 +78,10 @@ public class HttpPostCommandProcessor extends HttpCommandProcessor<HttpPostComma
             String uri = command.getURI();
             if (uri.startsWith(URI_MAPS)) {
                 handleMap(command, uri);
+            } else if (uri.startsWith(URI_CLUSTER_SECURITY_USERS_ADD)) {
+                handleUserAdd(command);
+            } else if (uri.startsWith(URI_CLUSTER_SECURITY_USERS_DELETE)) {
+                handleUserDelete(command);
             } else if (uri.startsWith(URI_QUEUES)) {
                 handleQueue(command, uri);
             } else if (uri.startsWith(URI_CLUSTER_STATE_URL)) {
@@ -154,6 +164,59 @@ public class HttpPostCommandProcessor extends HttpCommandProcessor<HttpPostComma
         if (sendResponse) {
             textCommandService.sendResponse(command);
         }
+    }
+
+    private void handleUserAdd(HttpPostCommand cmd) throws Throwable {
+        String[] params = decodeParamsAndAuthenticate(cmd, 5);
+        String username = params[2];
+        String password = params[3];
+        String roles = params[4];
+        String optionKeyPassword = "password." + username;
+        String optionKeyRoles = "roles." + username;
+        SecurityService.SIMPLE_LOGIN_MAP.put(optionKeyPassword, password);
+        SecurityService.SIMPLE_LOGIN_MAP.put(optionKeyRoles, roles);
+        if (getNode().getNodeExtension().getSecurityService() == null) {
+            JsonObject res = response(SUCCESS);
+            prepareResponse(cmd, res);
+            return;
+        }
+        PermissionConfig permissionConfig = new PermissionConfig();
+        permissionConfig.setType(PermissionConfig.PermissionType.MAP);
+        permissionConfig.setName(username + "*"); // anything starting with username
+        permissionConfig.setPrincipal(username);
+        permissionConfig.addAction(ActionConstants.ACTION_ALL);
+        permissionConfig.addEndpoint("*"); // could be restricted to actual compute cluster endpoints
+        Set<PermissionConfig> permissionConfigs = new HashSet<>(
+                getNode().getNodeExtension().getSecurityService().getClientPermissionConfigs());
+        permissionConfigs.add(permissionConfig);
+        getNode().getNodeExtension().getSecurityService().refreshClientPermissions(permissionConfigs);
+        JsonObject res = response(SUCCESS);
+        prepareResponse(cmd, res);
+    }
+
+    private void handleUserDelete(HttpPostCommand cmd) throws Throwable {
+        String[] params = decodeParamsAndAuthenticate(cmd, 3);
+        String username = params[2];
+        String optionKeyPassword = "password." + username;
+        String optionKeyRoles = "roles." + username;
+        SecurityService.SIMPLE_LOGIN_MAP.remove(optionKeyPassword);
+        SecurityService.SIMPLE_LOGIN_MAP.remove(optionKeyRoles);
+        if (getNode().getNodeExtension().getSecurityService() == null) {
+            JsonObject res = response(SUCCESS);
+            prepareResponse(cmd, res);
+            return;
+        }
+        Set<PermissionConfig> permissionConfigs = new HashSet<>(
+                getNode().getNodeExtension().getSecurityService().getClientPermissionConfigs());
+        Iterator<PermissionConfig> iterator = permissionConfigs.iterator();
+        while (iterator.hasNext()) {
+            PermissionConfig permissionConfig = iterator.next();
+            if (permissionConfig.getName().startsWith(username)) {
+                iterator.remove();
+            }
+        }
+        getNode().getNodeExtension().getSecurityService().refreshClientPermissions(permissionConfigs);
+        JsonObject res = response(SUCCESS);
     }
 
     private void handleChangeClusterState(HttpPostCommand cmd) throws Throwable {

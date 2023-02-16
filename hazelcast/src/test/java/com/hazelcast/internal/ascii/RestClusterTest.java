@@ -32,6 +32,7 @@ import com.hazelcast.internal.json.JsonArray;
 import com.hazelcast.internal.json.JsonObject;
 import com.hazelcast.internal.json.JsonValue;
 import com.hazelcast.test.HazelcastParallelClassRunner;
+import com.hazelcast.test.HazelcastSerialClassRunner;
 import com.hazelcast.test.HazelcastTestSupport;
 import com.hazelcast.test.TestAwareInstanceFactory;
 import com.hazelcast.test.annotation.QuickTest;
@@ -50,19 +51,22 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.stream.Collectors;
 
+import static com.hazelcast.security.SecurityService.SIMPLE_LOGIN_MAP;
 import static com.hazelcast.test.HazelcastTestSupport.assertClusterStateEventually;
 import static com.hazelcast.test.HazelcastTestSupport.assertContains;
 import static com.hazelcast.test.HazelcastTestSupport.assertContainsAll;
 import static com.hazelcast.test.HazelcastTestSupport.assertOpenEventually;
 import static com.hazelcast.test.HazelcastTestSupport.assertTrueEventually;
+import static com.hazelcast.test.HazelcastTestSupport.sleepSeconds;
 import static com.hazelcast.test.HazelcastTestSupport.smallInstanceConfig;
 import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-@RunWith(HazelcastParallelClassRunner.class)
+@RunWith(HazelcastSerialClassRunner.class)
 @Category(QuickTest.class)
 public class RestClusterTest {
 
@@ -172,6 +176,41 @@ public class RestClusterTest {
 
         assertClusterStateEventually(ClusterState.FROZEN, instance1);
         assertClusterStateEventually(ClusterState.FROZEN, instance2);
+    }
+
+    @Test
+    public void testUserAdd() throws Exception {
+        Config config = createConfigWithRestEnabled();
+        final HazelcastInstance instance1 = factory.newHazelcastInstance(config);
+        final HazelcastInstance instance2 = factory.newHazelcastInstance(config);
+        HTTPCommunicator communicator = new HTTPCommunicator(instance1);
+        String clusterName = config.getClusterName();
+
+        ConnectionResponse resp = communicator.userAdd(clusterName, getPassword(), "user1",
+                "pass1", "user1,manager");
+        assertSuccessJson(resp);
+
+        assertEquals("pass1", SIMPLE_LOGIN_MAP.get("password.user1"));
+        assertEquals("user1,manager", SIMPLE_LOGIN_MAP.get("roles.user1"));
+    }
+
+    @Test
+    public void testUserDelete() throws Exception {
+        Config config = createConfigWithRestEnabled();
+        final HazelcastInstance instance1 = factory.newHazelcastInstance(config);
+        final HazelcastInstance instance2 = factory.newHazelcastInstance(config);
+        HTTPCommunicator communicator = new HTTPCommunicator(instance1);
+        String clusterName = config.getClusterName();
+
+        ConnectionResponse resp = communicator.userAdd(clusterName, getPassword(), "user2", "pass2", "user2");
+        assertSuccessJson(resp);
+
+        assertEquals("pass2", SIMPLE_LOGIN_MAP.get("password.user2"));
+        assertEquals("user2", SIMPLE_LOGIN_MAP.get("roles.user2"));
+
+        resp = communicator.userDelete(clusterName, getPassword(), "user2");
+        assertSuccessJson(resp);
+        assertNull(SIMPLE_LOGIN_MAP.get("password.user2"));
     }
 
     @Test

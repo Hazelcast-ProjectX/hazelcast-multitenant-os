@@ -57,6 +57,8 @@ public abstract class HttpCommandProcessor<T extends HttpCommand> extends Abstra
 
     // Cluster
     public static final String URI_CLUSTER = "/hazelcast/rest/cluster";
+    public static final String URI_CLUSTER_SECURITY_USERS_ADD = "/hazelcast/rest/management/cluster/users/add";
+    public static final String URI_CLUSTER_SECURITY_USERS_DELETE = "/hazelcast/rest/management/cluster/users/delete";
     public static final String URI_CLUSTER_MANAGEMENT_BASE_URL = "/hazelcast/rest/management/cluster";
     public static final String URI_CLUSTER_STATE_URL = URI_CLUSTER_MANAGEMENT_BASE_URL + "/state";
     public static final String URI_CHANGE_CLUSTER_STATE_URL = URI_CLUSTER_MANAGEMENT_BASE_URL + "/changeState";

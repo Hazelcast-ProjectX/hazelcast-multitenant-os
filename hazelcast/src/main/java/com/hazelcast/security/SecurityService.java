@@ -19,11 +19,15 @@ package com.hazelcast.security;
 import com.hazelcast.config.PermissionConfig;
 
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * Provides necessary methods to initiate security related config changes.
  */
 public interface SecurityService {
+
+    ConcurrentMap<String, Object> SIMPLE_LOGIN_MAP = new ConcurrentHashMap<>();
 
     /**
      * Propagates changes made to client permissions to all members and reinitiates {@link IPermissionPolicy} with new
