@@ -8,6 +8,6 @@ public class RemoteMapUtil {
     }
 
     static String clusterId(MapServiceContext mapServiceContext) {
-        return mapServiceContext.getNodeEngine().getClusterService().getClusterId() + ".";
+        return mapServiceContext.getNodeEngine().getConfig().getClusterName() + ".";
     }
 }

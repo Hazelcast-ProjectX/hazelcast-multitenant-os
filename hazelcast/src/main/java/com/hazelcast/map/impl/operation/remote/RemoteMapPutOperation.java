@@ -1,6 +1,5 @@
 package com.hazelcast.map.impl.operation.remote;
 
-import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.internal.serialization.Data;
 import com.hazelcast.map.impl.MapDataSerializerHook;
 import com.hazelcast.map.impl.operation.PutOperation;
@@ -8,9 +7,6 @@ import com.hazelcast.map.impl.operation.PutOperation;
 import static com.hazelcast.map.impl.operation.remote.RemoteMapUtil.clusterId;
 
 public class RemoteMapPutOperation extends PutOperation implements RemoteMapOperation {
-
-    HazelcastInstance remoteClusterClient;
-    String clusterId;
 
     public RemoteMapPutOperation() {
     }
