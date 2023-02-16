@@ -6,9 +6,11 @@ import com.hazelcast.map.impl.MapService;
 import com.hazelcast.query.Predicate;
 import com.hazelcast.spi.impl.InternalCompletableFuture;
 import com.hazelcast.spi.impl.NodeEngine;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
 import java.util.Collection;
+import java.util.Map;
 import java.util.Set;
 
 import static com.hazelcast.map.impl.operation.remote.RemoteMapUtil.clusterId;
@@ -29,6 +31,11 @@ public class RemoteMapProxy<K, V> extends MapProxyImpl<K, V> {
     @Override
     public InternalCompletableFuture<V> getAsync(@Nonnull K key) {
         return (InternalCompletableFuture<V>) remoteClusterClient.getMap(prefixedMapName()).getAsync(key).toCompletableFuture();
+    }
+
+    @Override
+    public InternalCompletableFuture<Void> putAllAsync(@NotNull Map<? extends K, ? extends V> map) {
+        return (InternalCompletableFuture<Void>) remoteClusterClient.getMap(prefixedMapName()).putAllAsync(map);
     }
 
     @Nonnull
