@@ -2,6 +2,7 @@ package com.hazelcast.map.impl.proxy;
 
 import com.hazelcast.config.MapConfig;
 import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.map.impl.MapContainer;
 import com.hazelcast.map.impl.MapService;
 import com.hazelcast.query.Predicate;
 import com.hazelcast.spi.impl.InternalCompletableFuture;
@@ -14,6 +15,7 @@ import java.util.Map;
 import java.util.Set;
 
 import static com.hazelcast.map.impl.operation.remote.RemoteMapUtil.clusterId;
+import static com.hazelcast.map.impl.operation.remote.RemoteMapUtil.extractCompactSchema;
 
 public class RemoteMapProxy<K, V> extends MapProxyImpl<K, V> {
 
@@ -35,11 +37,17 @@ public class RemoteMapProxy<K, V> extends MapProxyImpl<K, V> {
 
     @Override
     public InternalCompletableFuture<Void> putAllAsync(@NotNull Map<? extends K, ? extends V> map) {
+        Map.Entry sampleEntry = map.entrySet().iterator().next();
+        assert sampleEntry != null;
+        MapContainer mapContainer = mapServiceContext.getMapContainer(name);
+        extractCompactSchema(mapContainer, mapServiceContext, sampleEntry.getKey(), sampleEntry.getValue());
         return (InternalCompletableFuture<Void>) remoteClusterClient.getMap(prefixedMapName()).putAllAsync(map);
     }
 
     @Override
     public V putIfAbsent(@Nonnull K key, @Nonnull V value) {
+        MapContainer mapContainer = mapServiceContext.getMapContainer(name);
+        extractCompactSchema(mapContainer, mapServiceContext, key, value);
         return (V) remoteClusterClient.getMap(prefixedMapName()).putIfAbsent(key, value);
     }
 
