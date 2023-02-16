@@ -7,6 +7,7 @@ import com.hazelcast.map.impl.operation.PutIfAbsentWithExpiryOperation;
 import java.util.concurrent.TimeUnit;
 
 import static com.hazelcast.map.impl.operation.remote.RemoteMapUtil.clusterId;
+import static com.hazelcast.map.impl.operation.remote.RemoteMapUtil.extractCompactSchema;
 
 public class RemoteMapPutIfAbsentOperation extends PutIfAbsentWithExpiryOperation implements RemoteMapOperation {
 
@@ -19,9 +20,12 @@ public class RemoteMapPutIfAbsentOperation extends PutIfAbsentWithExpiryOperatio
 
     @Override
     protected void runInternal() {
+        Object key = mapServiceContext.toObject(dataKey);
+        Object value = mapServiceContext.toObject(dataValue);
+        extractCompactSchema(mapContainer, mapServiceContext, key, value);
         this.oldValue = mapServiceContext.getRemoteClusterClient()
                 .getMap(clusterId(mapServiceContext) + name).putIfAbsent(
-                dataKey, dataValue,
+                key, value,
                 getTtl(), TimeUnit.MILLISECONDS,
                 getMaxIdle(), TimeUnit.MILLISECONDS
         );
